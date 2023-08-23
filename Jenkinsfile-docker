@@ -3,7 +3,9 @@ agent none
 
 stages {
 stage('Checkout') {
-  agent any
+  agent {
+    label "docker"
+  }
   steps {
     git branch: 'main', url: 'https://github.com/ksooo091/source-maven-java-spring-hello-webapp.git'
   }
