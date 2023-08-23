@@ -25,9 +25,7 @@ stage('Test') {
   }
 }
 stage('Build Docker Image') {
-  agent {
-    label "docker"
-  }
+  agent any
   steps {
     sh 'docker build . -t ghcr.io/ksooo091/mvn-test:latest'
   }
