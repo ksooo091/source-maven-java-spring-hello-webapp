@@ -33,16 +33,16 @@ stage('Build Docker Image') {
 stage('Tag Docker Image') {
   agent any
   steps {
-    sh 'docker tag mvnweb ghcr.io/ksooo091/mvn-test:$BUILD_NUMBER'
-    sh 'docker tag mvnweb ghcr.io/ksooo091/mvn-test:latest'
+    sh 'docker tag mvnweb ghcr.io/ksooo091/mvn-test-ansible:$BUILD_NUMBER'
+    sh 'docker tag mvnweb ghcr.io/ksooo091/mvn-test-ansible:latest'
   }
 }
 stage('Publish Docker Image') {
   agent any
   steps {
     withDockerRegistry(credentialsId: 'ghcr-hub-token', url: 'https://ghcr.io/') {
-      sh 'docker push ghcr.io/ksooo091/mvn-test:latest '
-      sh 'docker push ghcr.io/ksooo091/mvn-test:$BUILD_NUMBER'
+      sh 'docker push ghcr.io/ksooo091/mvn-test-ansible:latest '
+      sh 'docker push ghcr.io/ksooo091/mvn-test-ansible:$BUILD_NUMBER'
     }
   }
 }
