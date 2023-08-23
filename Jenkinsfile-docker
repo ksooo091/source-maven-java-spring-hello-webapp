@@ -1,0 +1,56 @@
+pipeline {
+agent none
+
+stages {
+stage('Checkout') {
+  agent any
+  steps {
+    git branch: 'main', url: 'https://github.com/ksooo091/source-maven-java-spring-hello-webapp.git'
+  }
+}
+stage('Build') {
+  agent {
+    docker { image 'maven:3-openjdk-8' }
+  }
+  steps {
+    sh 'mvn clean package -DskipTests=true'
+  }
+}
+stage('Test') {
+  agent {
+    docker { image 'maven:3-openjdk-8' }
+  }
+  steps {
+    sh 'mvn test'
+  }
+}
+stage('Build Docker Image') {
+  agent any
+  steps {
+    sh 'docker build . -t ghcr.io/ksooo091/mvn-test:latest'
+  }
+}
+// stage('Tag Docker Image') {
+//   agent any
+//   steps {
+//     sh 'docker tag'
+//   }
+// }
+stage('Publish Docker Image') {
+  agent any
+  steps {
+    withDockerRegistry(credentialsId: 'ghcr-hub-token', url: 'https://ghcr.io/') {
+      sh 'docker push ghcr.io/ksooo091/mvn-test:latest '
+    }
+  }
+}
+stage('Run Docker Container') {
+  agent {
+    docker { image 'docker:dind' }
+  }
+  steps {
+    sh 'docker -H tcp://docker:2375 container run --detach --name mvn-test -p 80:8080 ghcr.io/ksooo091/mvn-test:latest'
+  }
+}
+}
+}
