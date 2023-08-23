@@ -3,9 +3,7 @@ agent none
 
 stages {
 stage('Checkout') {
-  agent {
-    label "docker"
-  }
+  agent any
   steps {
     git branch: 'main', url: 'https://github.com/ksooo091/source-maven-java-spring-hello-webapp.git'
   }
@@ -27,7 +25,9 @@ stage('Test') {
   }
 }
 stage('Build Docker Image') {
-  agent any
+  agent {
+    label "docker"
+  }
   steps {
     sh 'docker build . -t ghcr.io/ksooo091/mvn-test:latest'
   }
