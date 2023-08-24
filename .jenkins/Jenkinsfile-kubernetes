@@ -14,27 +14,6 @@ spec:
     - infinity
   - name: git
     image: alpine/git
-    env:
-      - name: githubEmail
-        valueFrom:
-          secretKeyRef:
-            name: gitsecret
-            key: githubEmail
-      - name: githubUser
-        valueFrom:
-          secretKeyRef:
-            name: gitsecret
-            key: githubUser
-      - name: githubURL
-        valueFrom:
-          secretKeyRef:
-            name: gitsecret
-            key: githubURL
-      - name: ghcrimage
-        valueFrom:
-          secretKeyRef:
-            name: gitsecret
-            key: ghcrimage
     command:
     - sleep
     args:
@@ -88,18 +67,13 @@ spec:
       }
     }
     stage('Update K8s Manifests & Push') {
-      environment {
-        githubURL = "https://github.com/ksooo091/ArgoCdStudyRepo.git"
-
-      }
       steps {
         container('git') {
           git branch: 'main', credentialsId: 'github-credential', url: "${githubURL}"
-          sh "echo $githubURL"
           sh "git config --global --add safe.directory ${workspace}"
           sh "git config --global user.name ${githubUser}"
           sh "git config --global user.email ${githubEmail}"
-          sh 'sed -i "s/image:.*/image: $ghcrimage:${BUILD_NUMBER}/g" deployment.yaml'
+          sh 'sed -i "s/image:.*/image: ${ghcrImage}:${BUILD_NUMBER}/g" deployment.yaml'
           sh 'git add deployment.yaml'
           sh 'git commit -m "Jenkins Build Number - ${BUILD_NUMBER}"'
           withCredentials([gitUsernamePassword(credentialsId: 'github-credential', gitToolName: 'Default')]) {
