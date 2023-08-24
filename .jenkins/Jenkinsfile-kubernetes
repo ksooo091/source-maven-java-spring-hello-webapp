@@ -14,12 +14,6 @@ spec:
     - infinity
   - name: git
     image: alpine/git
-    command:
-    - sleep
-    args:
-    - infinity
-  - name: kaniko
-    image: gcr.io/kaniko-project/executor:debug
     env:
       - name: githubEmail
         valueFrom:
@@ -41,7 +35,12 @@ spec:
           secretKeyRef:
             name: gitsecret
             key: ghcrimage
-
+    command:
+    - sleep
+    args:
+    - infinity
+  - name: kaniko
+    image: gcr.io/kaniko-project/executor:debug
     command:
     - sleep
     args:
