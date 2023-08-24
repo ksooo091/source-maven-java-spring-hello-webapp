@@ -14,6 +14,28 @@ spec:
     - infinity
   - name: kaniko
     image: gcr.io/kaniko-project/executor:debug
+    env:
+      - name: githubEmail
+        valueFrom:
+          secretKeyRef:
+            name: gitsecret
+            key: githubEmail
+      - name: githubUser
+        valueFrom:
+          secretKeyRef:
+            name: gitsecret
+            key: githubUser
+      - name: githubURL
+        valueFrom:
+          secretKeyRef:
+            name: gitsecret
+            key: githubURL
+      - name: ghcrimage
+        valueFrom:
+          secretKeyRef:
+            name: gitsecret
+            key: ghcrimage
+
     command:
     - sleep
     args:
@@ -57,6 +79,26 @@ spec:
       steps {
         container('kaniko') {
           sh 'executor --context=dir://$WORKSPACE --destination=ghcr.io/ksooo091/mvn-test:$BUILD_NUMBER --destination=ghcr.io/ksooo091/mvn-test:latest'
+        }
+      }
+    }
+    stage('Update K8s Manifests & Push') {
+      environment {
+        githubURL = "https://github.com/ksooo091/ArgoCdStudyRepo.git"
+
+      }
+      steps {
+        container('git') {
+          git branch: 'main', credentialsId: 'github-credential', url: "${githubURL}"
+          sh "git config --global --add safe.directory ${workspace}"
+          sh "git config --global user.name $githubUser"
+          sh "git config --global user.email $githubEmail"
+          sh 'sed -i "s/image:.*/image: $ghcrimage:${BUILD_NUMBER}/g" deployment.yaml'
+          sh 'git add deployment.yaml'
+          sh 'git commit -m "Jenkins Build Number - ${BUILD_NUMBER}"'
+          withCredentials([gitUsernamePassword(credentialsId: 'github-credential', gitToolName: 'Default')]) {
+            sh 'git push --set-upstream origin main'
+          }
         }
       }
     }
