@@ -62,7 +62,7 @@ spec:
     stage('Build & Tag & Push Docker Image') {
       steps {
         container('kaniko') {
-          sh 'executor --context=dir://$WORKSPACE --destination=ghcr.io/ksooo091/mvn-test:$BUILD_NUMBER --destination=ghcr.io/ksooo091/mvn-test:latest'
+          sh 'executor --context=dir://$WORKSPACE --destination=ghcr.io/${githubUser}/${ghcrImage}:$BUILD_NUMBER --destination=ghcr.io/${githubUser}/${ghcrImage}:latest'
         }
       }
     }
